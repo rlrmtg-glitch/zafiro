@@ -172,9 +172,9 @@ class OperationApprovalVault(
             request.policyVersion.toString(),
         )
         val bytes = fields.joinToString(separator = "") { field ->
-            val encoded = field.toByteArray(StandardCharsets.UTF_8)
-            "${encoded.size}:".toByteArray(StandardCharsets.US_ASCII) + encoded
-        }
+            val encodedSize = field.toByteArray(StandardCharsets.UTF_8).size
+            "$encodedSize:$field"
+        }.toByteArray(StandardCharsets.UTF_8)
         return sha256(bytes)
     }
 
