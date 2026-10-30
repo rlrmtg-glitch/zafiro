@@ -46,6 +46,15 @@ class OperationApprovalVaultTest {
     }
 
     @Test
+    fun utf8ArgumentsAreBoundToExactOperation() {
+        val original = request(args = """{"path":"/tmp/café/文件"}""")
+        val token = vault.approveAfterHumanConfirmation(original, "human-1")!!
+
+        assertNotNull(vault.consume(token, original, "session-a", 4L))
+        assertNull(vault.consume(token, original, "session-a", 4L))
+    }
+
+    @Test
     fun changedArgumentsBurnTheToken() {
         val token = vault.approveAfterHumanConfirmation(request(), "human-1")!!
         assertNull(vault.consume(token, request(args = "{\"path\":\"/tmp/b\"}"), "session-a", 4L))
