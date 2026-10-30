@@ -32,6 +32,12 @@ import java.io.File
 class McpToolAdapter(
     private val builtinRegistry: BuiltinToolRegistry = BuiltinToolRegistry.default(),
     private val tenantId: String = "mcp-host",
+    /**
+     * Explicit host-side allowlist. Empty by default so MCP cannot bypass the
+     * model-facing capability exposure policy. Populate only after each tool
+     * is routed through the same operation approval broker.
+     */
+    private val governedAllowedToolNames: Set<String> = emptySet(),
 ) {
     private companion object {
         private const val LOG_TAG = "niki914_zafiro_McpToolAdapter"
@@ -51,7 +57,8 @@ class McpToolAdapter(
         )
 
         val exposedTools = builtinRegistry.all().filter { tool ->
-            !tool.name.startsWith("mcp__") &&
+            governedAllowedToolNames.contains(tool.name) &&
+                    !tool.name.startsWith("mcp__") &&
                     config.isToolExposed(tool.name)
         }
 
@@ -74,7 +81,9 @@ class McpToolAdapter(
     private suspend fun executeTool(tool: BuiltinTool, request: CallToolRequest): CallToolResult =
         withContext(AgentTenantContext(tenantId)) {
             val argsJson = request.arguments?.toString() ?: "{}"
-            Logger.i(LOG_TAG, "tool invoke start: ${tool.name} args=$argsJson")
+            // Tool arguments may contain passwords, API keys, personal data or
+            // private file paths. Never write raw MCP arguments to application logs.
+            Logger.i(LOG_TAG, "tool invoke start: ${tool.name}")
             val startTime = System.currentTimeMillis()
 
             try {
