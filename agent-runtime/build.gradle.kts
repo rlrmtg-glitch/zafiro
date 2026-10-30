@@ -2,7 +2,7 @@ plugins {
     id("com.android.library") version "9.1.1"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.0"
 
-    id("com.chaquo.python") version "17.0.0"
+    id("com.chaquo.python") version "17.2.0"
 }
 
 android {

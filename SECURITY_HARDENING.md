@@ -128,8 +128,14 @@ lock, process restart and concurrent requests.
   Keystore-backed encryption, database/settings protection, credential
   redaction across all logs, retention and secure export/deletion remain
   outstanding.
-- Phase 5: no verified TLS, SSH host-key or dependency upgrades have been
-  applied.
+- Phase 5: OkHttp was updated to 4.12.1, JSch to 2.28.6 and Chaquopy to
+  17.2.0. These are source-level dependency updates only; compatibility/build
+  verification remains outstanding. The SSH client still explicitly uses
+  `SshHostKeyPolicy.AcceptAny` and disables strict host-key checking in its
+  backend. SSH remains unavailable through the secure-default tool exposure
+  gate, but this latent unsafe configuration must be replaced with a
+  known-hosts trust flow before SSH can ever be re-enabled. Cleartext traffic
+  remains enabled pending endpoint migration and regression tests.
 - Phase 6: background-agent execution limits and authority revocation are
   outstanding.
 - Phase 7: build workflow actions are pinned to immutable commit SHAs; the Gradle 9.3.1 distribution checksum is configured and the official Gradle 9.3.1 wrapper-JAR checksum is checked in CI. Dependency locking/verification, repository allowlisting, SBOM and provenance remain outstanding. The wrapper checksum step and build have not yet been executed.

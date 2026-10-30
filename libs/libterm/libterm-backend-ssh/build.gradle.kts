@@ -32,7 +32,7 @@ android {
 dependencies {
     implementation(project(":libs:libterm-core"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation("com.github.mwiede:jsch:2.28.3")
+    implementation("com.github.mwiede:jsch:2.28.6")
 
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:2.2.10")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
