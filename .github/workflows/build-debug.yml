@@ -53,6 +53,15 @@ jobs:
           chmod +x gradlew
           ./gradlew --version
 
+      - name: Run Kotlin and Python verification gates
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon --stacktrace \
+            :agent-runtime:testDebugUnitTest \
+            :app:testDebugUnitTest \
+            :agent-runtime:check \
+            2>&1 | tee build-verification.log
+
       - name: Assemble debug APK without device ADB tasks
         run: ./gradlew --no-daemon --stacktrace :app:assembleDebug -x :app:adbForward
 
@@ -61,7 +70,7 @@ jobs:
           set -euo pipefail
           APK="app/build/outputs/apk/debug/app-debug.apk"
           test -s "$APK"
-          sha256sum "$APK"
+          sha256sum "$APK" | tee apk-sha256.txt
           ls -lh "$APK"
 
       - name: Upload debug APK
@@ -70,4 +79,15 @@ jobs:
           name: zafiro-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload verification logs and checksums
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: zafiro-verification-evidence
+          path: |
+            build-verification.log
+            apk-sha256.txt
+          if-no-files-found: warn
           retention-days: 7
