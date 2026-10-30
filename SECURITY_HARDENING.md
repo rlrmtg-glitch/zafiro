@@ -100,6 +100,13 @@ policy override, memory mutation, screen interaction, root/Shizuku, SSH host
 verification, credential leakage, cleartext traffic, cancellation, device
 lock, process restart and concurrent requests.
 
+## Incremental implementation update
+
+- Added `OperationApprovalVault`: cryptographically random 256-bit bearer tokens, SHA-256 token storage, exact-operation digest binding, session and policy-version binding, 60-second default expiry, one-use consumption, bounded outstanding-token count, and session/global revocation.
+- Added unit tests for exact-operation binding, replay, modified arguments, session mismatch, policy mismatch, expiry and revocation.
+- Changed `android:allowBackup` to `false` as a conservative data-protection baseline. This is a compatibility-impacting change: app data will no longer participate in Android backup/restore by default. A future explicit export/restore design is still required.
+- Important limitation: the approval vault is a primitive, not a complete authorization system. No trusted approval UI/controller is connected, and it does not itself prove that `approveAfterHumanConfirmation` was called as a result of a genuine human action. Do not wire this method to model-, MCP-, skill- or background-agent-controlled code.
+
 ## Current implementation status
 
 - Phase 0: branch created from the audited commit.

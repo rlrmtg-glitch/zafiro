@@ -28,7 +28,7 @@
 
     <application
         android:name="com.niki914.zafiro.app.App"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:enableOnBackInvokedCallback="true"
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"
