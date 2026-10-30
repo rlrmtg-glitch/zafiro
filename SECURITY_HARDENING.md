@@ -132,7 +132,6 @@ lock, process restart and concurrent requests.
   applied.
 - Phase 6: background-agent execution limits and authority revocation are
   outstanding.
-- Phase 7: dependency verification/locking, immutable workflow action pins,
-  wrapper checksum validation, SBOM and provenance are outstanding.
+- Phase 7: build workflow actions are pinned to immutable commit SHAs; the Gradle 9.3.1 distribution checksum is configured and the official Gradle 9.3.1 wrapper-JAR checksum is checked in CI. Dependency locking/verification, repository allowlisting, SBOM and provenance remain outstanding. The wrapper checksum step and build have not yet been executed.
 - Phase 8: tests have been added but have not been run; no build or dynamic
   security test has been completed.

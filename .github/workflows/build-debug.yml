@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           test -s gradlew
           test -s gradle/wrapper/gradle-wrapper.jar
-          printf '%s  %s\\n' \
+          printf '%s  %s\n' \
             'b3a875ddc1f044746e1b1a55f645584505f4a10438c1afea9f15e92a7c42ec13' \
             'gradle/wrapper/gradle-wrapper.jar' | sha256sum --check
 
