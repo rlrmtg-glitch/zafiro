@@ -37,7 +37,7 @@ jobs:
           packages: platform-tools
 
       - name: Install Android 37 platform
-        run: sdkmanager "platforms;android-37" "platform-tools"
+        run: sdkmanager "platforms;android-37.0" "platform-tools"
 
       - name: Verify Gradle wrapper
         run: |
