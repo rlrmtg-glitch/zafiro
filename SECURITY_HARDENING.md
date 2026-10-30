@@ -113,11 +113,26 @@ lock, process restart and concurrent requests.
 ## Current implementation status
 
 - Phase 0: branch created from the audited commit.
-- Phase 1: initial capability exposure policy added; full approval manager,
-  operation-bound token lifecycle and tamper-evident audit remain incomplete.
-- Phase 2: tool resolution now fails closed by exposing no builtin tools,
-  custom Python tools or MCP servers under the default policy. This is a
-  containment gate, not proof that every internal/direct execution path is
-  brokered.
-- Phases 3–8: documented requirements only; implementation and verification
-  remain outstanding.
+- Phase 1: deny-by-default exposure policy and an operation-bound, expiring,
+  one-use approval-token vault are present with focused unit tests. A trusted
+  human approval UI/controller, execution-time broker integration, durable
+  tamper-evident audit log and device-lock/process-restart revocation are not
+  implemented.
+- Phase 2: model-facing tool resolution and the MCP server adapter fail closed
+  by default. Direct/internal execution paths have not all been proven brokered.
+- Phase 3: Android backup is disabled by default. Cleartext traffic remains
+  enabled and broad storage/overlay/accessibility/foreground-service
+  permissions remain; exported-component and privileged-entry-point reviews
+  are incomplete.
+- Phase 4: MCP raw-argument and exception-detail logging/output are reduced.
+  Keystore-backed encryption, database/settings protection, credential
+  redaction across all logs, retention and secure export/deletion remain
+  outstanding.
+- Phase 5: no verified TLS, SSH host-key or dependency upgrades have been
+  applied.
+- Phase 6: background-agent execution limits and authority revocation are
+  outstanding.
+- Phase 7: dependency verification/locking, immutable workflow action pins,
+  wrapper checksum validation, SBOM and provenance are outstanding.
+- Phase 8: tests have been added but have not been run; no build or dynamic
+  security test has been completed.
