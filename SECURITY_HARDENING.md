@@ -106,6 +106,8 @@ lock, process restart and concurrent requests.
 - Added unit tests for exact-operation binding, replay, modified arguments, session mismatch, policy mismatch, expiry and revocation.
 - Changed `android:allowBackup` to `false` as a conservative data-protection baseline.
 - Hardened the MCP server adapter with an explicit host-side tool allowlist that is empty by default. The MCP service configuration alone can no longer expose tools; a tool must also be explicitly allowlisted in code. Removed raw argument logging from the MCP invocation start event to reduce credential and personal-data leakage. This is a compatibility-impacting change: app data will no longer participate in Android backup/restore by default. A future explicit export/restore design is still required.
+- Hardened MCP exception handling so exception messages, stack traces, image file paths and parser exception details are not copied into logs or returned to the remote caller. MCP callers receive a generic failure message; detailed diagnostics must be captured only in a separately protected local diagnostic channel.
+- Added constructor bounds to the approval vault (1 ms–5 minutes, at most 256 outstanding tokens), overflow-safe expiry calculation and tests for invalid bounds.
 - Important limitation: the approval vault is a primitive, not a complete authorization system. No trusted approval UI/controller is connected, and it does not itself prove that `approveAfterHumanConfirmation` was called as a result of a genuine human action. Do not wire this method to model-, MCP-, skill- or background-agent-controlled code.
 
 ## Current implementation status

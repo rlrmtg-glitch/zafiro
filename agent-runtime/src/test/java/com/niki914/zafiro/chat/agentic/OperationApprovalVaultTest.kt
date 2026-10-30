@@ -27,6 +27,16 @@ class OperationApprovalVaultTest {
         policyVersion = policy,
     )
 
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsZeroTokenLifetime() {
+        OperationApprovalVault(clock = { now }, tokenLifetimeMillis = 0L)
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun rejectsUnboundedOutstandingTokenLimit() {
+        OperationApprovalVault(clock = { now }, maxOutstandingTokens = 257)
+    }
+
     @Test
     fun approvalIsBoundToExactOperationAndIsOneUse() {
         val original = request()

@@ -131,16 +131,17 @@ class McpToolAdapter(
                 throw e
             } catch (e: Exception) {
                 val durationMs = System.currentTimeMillis() - startTime
+                // Exception messages and stack traces can contain secrets, request
+                // arguments, remote responses or private filesystem paths.
                 Logger.e(
                     LOG_TAG,
-                    "tool invoke exception: ${tool.name}: ${e.message} durationMs=$durationMs",
-                    e
+                    "tool invoke failed: ${tool.name} durationMs=$durationMs"
                 )
                 val errJson = JsonObject(
                     mapOf(
                         "ok" to JsonPrimitive(false),
                         "code" to JsonPrimitive("EXCEPTION"),
-                        "message" to JsonPrimitive(e.message ?: "Tool execution exception"),
+                        "message" to JsonPrimitive("Tool execution failed"),
                     )
                 ).toString()
                 CallToolResult(
@@ -174,7 +175,7 @@ class McpToolAdapter(
             val base64 = Base64.encodeToString(bytes, Base64.NO_WRAP)
             ImageContent(data = base64, mimeType = mimeType)
         } catch (e: Exception) {
-            Logger.w(LOG_TAG, "failed to read image file $path: ${e.message}")
+            Logger.w(LOG_TAG, "failed to read image content")
             null
         }
     }
@@ -198,7 +199,7 @@ class McpToolAdapter(
                 defs = defs,
             )
         } catch (e: Exception) {
-            Logger.w(LOG_TAG, "failed to parse input schema: ${e.message}")
+            Logger.w(LOG_TAG, "failed to parse tool input schema")
             ToolSchema(properties = JsonObject(emptyMap()), required = emptyList())
         }
     }

@@ -57,6 +57,15 @@ class OperationApprovalVault(
 
     private val tokens = LinkedHashMap<String, StoredToken>()
 
+    init {
+        require(tokenLifetimeMillis in 1L..MAX_TOKEN_LIFETIME_MILLIS) {
+            "Approval token lifetime must be between 1 ms and 5 minutes"
+        }
+        require(maxOutstandingTokens in 1..MAX_OUTSTANDING_TOKENS) {
+            "Outstanding approval token limit must be between 1 and 256"
+        }
+    }
+
     /**
      * Call only from a trusted human-confirmation handler, never from a model
      * tool, MCP request, background agent, or imported skill.
@@ -73,7 +82,8 @@ class OperationApprovalVault(
         val raw = ByteArray(TOKEN_BYTES).also(random::nextBytes)
         val token = Base64.getUrlEncoder().withoutPadding().encodeToString(raw)
         val now = clock()
-        val expires = now + tokenLifetimeMillis
+        val expires = runCatching { Math.addExact(now, tokenLifetimeMillis) }.getOrNull()
+            ?: return null
         val tokenHash = sha256(token)
         tokens[tokenHash] = StoredToken(
             tokenHash = tokenHash,
@@ -184,6 +194,8 @@ class OperationApprovalVault(
 
     companion object {
         private const val TOKEN_BYTES = 32
+        private const val MAX_TOKEN_LIFETIME_MILLIS = 5 * 60_000L
+        private const val MAX_OUTSTANDING_TOKENS = 256
         const val DEFAULT_TOKEN_LIFETIME_MILLIS = 60_000L
         const val DEFAULT_MAX_OUTSTANDING_TOKENS = 64
     }
