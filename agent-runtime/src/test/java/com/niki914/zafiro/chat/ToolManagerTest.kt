@@ -1,6 +1,7 @@
 package com.niki914.zafiro.chat
 
 import com.niki914.zafiro.chat.agentic.ToolManager
+import com.niki914.zafiro.chat.agentic.GovernanceToolExposure
 import com.niki914.zafiro.chat.agentic.buildin.BuiltinTool
 import com.niki914.zafiro.chat.agentic.buildin.BuiltinToolRegistry
 import com.niki914.zafiro.chat.agentic.buildin.BuiltinToolRequest
@@ -24,7 +25,8 @@ class ToolManagerTest {
         val resolved = ToolManager(
             builtinToolRegistry = BuiltinToolRegistry(
                 listOf(FakeBuiltinTool(name = "time", description = "Read current time."))
-            )
+            ),
+            exposure = GovernanceToolExposure.permissiveForTests(),
         ).resolve(
             customPyTools = listOf(
                 CustomPyTool(
@@ -65,7 +67,8 @@ class ToolManagerTest {
         val resolved = ToolManager(
             builtinToolRegistry = BuiltinToolRegistry(
                 listOf(FakeBuiltinTool(name = "time", description = "Read current time."))
-            )
+            ),
+            exposure = GovernanceToolExposure.permissiveForTests(),
         ).resolve(
             customPyTools = listOf(
                 CustomPyTool(

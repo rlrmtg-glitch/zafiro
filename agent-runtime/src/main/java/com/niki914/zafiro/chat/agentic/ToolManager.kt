@@ -12,6 +12,7 @@ import com.niki914.zafiro.settings.model.RuntimeMcpServer as McpServer
 
 class ToolManager(
     private val builtinToolRegistry: BuiltinToolRegistry = BuiltinToolRegistry.default(),
+    private val exposure: GovernanceToolExposure = GovernanceToolExposure.secureDefault(),
 ) {
     private companion object {
         const val LOG_TAG = "niki914_zafiro_ToolManager"
@@ -43,7 +44,7 @@ class ToolManager(
 
     private fun buildBuiltinTools(settings: List<BuiltinToolSetting>): List<LocalTool.Builtin> {
         return settings
-            .filter { it.enabled }
+            .filter { it.enabled && exposure.allowsBuiltin(it.name) }
             .sortedBy { it.name }
             .mapNotNull { setting ->
                 val tool = findBuiltinTool(setting.name) ?: return@mapNotNull null
@@ -61,6 +62,7 @@ class ToolManager(
     }
 
     private fun buildCustomPyTools(tools: List<RuntimeCustomPyTool>): List<LocalTool.Py> {
+        if (!exposure.allowCustomPython) return emptyList()
         return tools
             .filter { it.enabled }
             .map { tool ->
@@ -77,6 +79,7 @@ class ToolManager(
     private fun buildMcpServers(
         servers: List<McpServer>,
     ): List<McpServerDefinition> {
+        if (!exposure.allowMcpServers) return emptyList()
         return servers.map { server ->
             McpServerDefinition.Http(
                 name = server.name,
@@ -86,5 +89,4 @@ class ToolManager(
             )
         }
     }
-
 }
