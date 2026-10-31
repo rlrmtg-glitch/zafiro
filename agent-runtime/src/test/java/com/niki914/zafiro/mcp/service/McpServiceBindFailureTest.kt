@@ -21,6 +21,18 @@ class McpServiceBindFailureTest {
     val silentLogger = SilentLoggerRule()
 
     @Test
+    fun nonLoopbackBindWithoutBearerTokenIsRejectedBeforeListening() {
+        val service = McpServiceImpl(McpToolAdapter(BuiltinToolRegistry(emptyList()))) {
+            RuntimeMcpServiceConfig(enabled = true, host = "0.0.0.0", bearerToken = "")
+        }
+
+        runBlocking { service.start() }
+
+        assertTrue(service.status.value is McpServiceStatus.Error)
+        runBlocking { service.stop() }
+    }
+
+    @Test
     fun occupiedPortYieldsErrorStatusInsteadOfUncaughtException() {
         val occupied = ServerSocket(0, 1, InetAddress.getByName("127.0.0.1"))
         val escaped = AtomicReference<Throwable?>(null)
