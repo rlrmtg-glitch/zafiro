@@ -2,6 +2,8 @@
 package com.niki914.zafiro.chat
 
 import com.niki914.okia.Okia
+import com.niki914.zafiro.chat.agentic.GovernanceToolExposure
+import com.niki914.zafiro.chat.agentic.ToolManager
 import com.niki914.okia.OkiaDependencies
 import com.niki914.okia.event.TurnEvent
 import com.niki914.okia.loop.AgentLoop
@@ -59,6 +61,7 @@ class AgentSessionEngineMcpTest {
     @Before
     fun setUp() {
         engine.resetForTest()
+        engine.toolManager = ToolManager(exposure = GovernanceToolExposure.permissiveForTests())
     }
 
     @After

@@ -1,6 +1,8 @@
 // 保护：AgentSessionEngine 与 Skill 注入 System Prompt、空列表容错与加载失败降级契约
 package com.niki914.zafiro.chat
 
+import com.niki914.zafiro.chat.agentic.GovernanceToolExposure
+import com.niki914.zafiro.chat.agentic.ToolManager
 import com.niki914.zafiro.chat.util.SilentLoggerRule
 import com.niki914.zafiro.settings.model.RuntimeLlmConfig
 import com.niki914.zafiro.settings.model.RuntimeSkillMetadata
@@ -10,6 +12,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -18,6 +21,12 @@ class AgentSessionEngineRefreshSkillTest {
     val silentLogger = SilentLoggerRule()
 
     private val engine = AgentSessionEngine()
+
+    @Before
+    fun setUp() {
+        engine.resetForTest()
+        engine.toolManager = ToolManager(exposure = GovernanceToolExposure.permissiveForTests())
+    }
 
     @Test
     fun refresh_passesEnabledSkillsIntoPrompt() = runTest {

@@ -79,7 +79,8 @@ class AgentSessionEngine {
     internal val streamPipeline = LlmStreamPipeline()
 
     private val promptComposer = PromptComposer()
-    private val toolManager = ToolManager()
+    // Test-only injection preserves the secure production default.
+    internal var toolManager = ToolManager()
     private val mcpRefreshScheduler =
         McpRefreshScheduler(CoroutineScope(SupervisorJob() + Dispatchers.IO))
 
