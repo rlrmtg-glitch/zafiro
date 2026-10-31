@@ -7,8 +7,11 @@ import com.niki914.zafiro.api.model.AgentState
 import com.niki914.zafiro.app.notification.TurnNotificationManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
 
@@ -87,13 +90,17 @@ object ConversationPersister {
         conversationId: () -> String?,
     ) {
         scope.launch {
-            status.distinctUntilChanged().collect { state ->
-                val boundary = when (state) {
-                    is AgentState.WaitingApproval -> true
-                    is AgentState.Idle -> state.lastOutcome != null
-                    else -> false
+            status.distinctUntilChanged()
+                // StateFlow conflates values while a collector is suspended.
+                // Filter to lifecycle boundaries first, then queue those small,
+                // consequential events so Room/notification I/O cannot swallow
+                // a rapid approval -> turn-complete transition.
+                .filter { state ->
+                    state is AgentState.WaitingApproval ||
+                        (state is AgentState.Idle && state.lastOutcome != null)
                 }
-                if (boundary) {
+                .buffer(Channel.UNLIMITED)
+                .collect { state ->
                     conversationId()?.let { id ->
                         try {
                             ConversationRepo.touchConversation(id)
@@ -105,7 +112,6 @@ object ConversationPersister {
                         }
                     }
                 }
-            }
         }
     }
 
