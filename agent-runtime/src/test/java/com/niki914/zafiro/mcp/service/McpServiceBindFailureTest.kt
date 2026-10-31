@@ -21,6 +21,14 @@ class McpServiceBindFailureTest {
     val silentLogger = SilentLoggerRule()
 
     @Test
+    fun bearerTokenValidationRejectsMissingMalformedAndIncorrectCredentials() {
+        assertTrue(!isBearerTokenValid("secret-token", null))
+        assertTrue(!isBearerTokenValid("secret-token", "Basic secret-token"))
+        assertTrue(!isBearerTokenValid("secret-token", "Bearer wrong-token"))
+        assertTrue(isBearerTokenValid("secret-token", "Bearer secret-token"))
+    }
+
+    @Test
     fun nonLoopbackBindWithoutBearerTokenIsRejectedBeforeListening() {
         val service = McpServiceImpl(McpToolAdapter(BuiltinToolRegistry(emptyList()))) {
             RuntimeMcpServiceConfig(enabled = true, host = "0.0.0.0", bearerToken = "")
