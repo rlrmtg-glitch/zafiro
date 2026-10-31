@@ -21,6 +21,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.security.MessageDigest
+import java.nio.charset.StandardCharsets
 
 class McpServiceImpl(
     private val toolAdapter: McpToolAdapter = McpToolAdapter(),
@@ -102,9 +104,8 @@ class McpServiceImpl(
                 intercept(ApplicationCallPipeline.Plugins) {
                     val expectedToken = config.bearerToken.trim()
                     if (expectedToken.isNotEmpty()) {
-                        val authHeader = call.request.header(HttpHeaders.Authorization)?.trim()
-                        val expectedHeader = "Bearer $expectedToken"
-                        if (authHeader == null || authHeader != expectedHeader) {
+                        val authHeader = call.request.header(HttpHeaders.Authorization)
+                        if (!isBearerTokenValid(expectedToken, authHeader)) {
                             Logger.w(
                                 LOG_TAG,
                                 "unauthorized MCP request rejected: missing or invalid Bearer token"
@@ -158,4 +159,22 @@ class McpServiceImpl(
             Logger.i(LOG_TAG, "MCP server stopped")
         }
     }
+}
+
+
+/**
+ * Validates a Bearer authorization header without ordinary string equality on
+ * the secret bytes. Header scheme matching is intentionally strict.
+ */
+internal fun isBearerTokenValid(expectedToken: String, authorizationHeader: String?): Boolean {
+    if (expectedToken.isBlank()) return false
+    val prefix = "Bearer "
+    if (authorizationHeader == null || !authorizationHeader.startsWith(prefix, ignoreCase = true)) {
+        return false
+    }
+    val suppliedToken = authorizationHeader.substring(prefix.length)
+    return MessageDigest.isEqual(
+        expectedToken.toByteArray(StandardCharsets.UTF_8),
+        suppliedToken.toByteArray(StandardCharsets.UTF_8),
+    )
 }
