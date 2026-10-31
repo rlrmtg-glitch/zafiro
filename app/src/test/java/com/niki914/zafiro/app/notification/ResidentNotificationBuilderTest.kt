@@ -4,6 +4,7 @@ package com.niki914.zafiro.app.notification
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
+import android.content.ComponentName
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.niki914.zafiro.api.model.AgentState
@@ -12,6 +13,7 @@ import com.niki914.zafiro.api.model.TurnOutcome
 import com.niki914.zafiro.app.R
 import com.niki914.zafiro.business.notification.NotificationChannelManagerImpl
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -31,6 +33,14 @@ class ResidentNotificationBuilderTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         channelManager = NotificationChannelManagerImpl(context = context)
+    }
+
+    @Test
+    fun residentNotificationActionReceiver_isNotExported() {
+        val component = ComponentName(context, ResidentNotificationActionReceiver::class.java)
+        val receiverInfo = context.packageManager.getReceiverInfo(component, 0)
+
+        assertFalse("Notification actions must not be callable by other apps", receiverInfo.exported)
     }
 
     @Test
