@@ -72,15 +72,17 @@ class McpServiceImpl(
 
     private fun startInternal(config: RuntimeMcpServiceConfig) {
         _status.value = McpServiceStatus.Starting
-        // A server bound beyond loopback must never accept unauthenticated
-        // requests. The tool allowlist is a second independent boundary, not
-        // a substitute for authenticating the HTTP endpoint itself.
-        if (config.host != "127.0.0.1" && config.bearerToken.isBlank()) {
+        // This server currently speaks plain HTTP and has no TLS listener.
+        // A bearer token over a non-loopback HTTP connection is observable on
+        // the network, so authentication alone is not a safe remote transport.
+        // Keep local MCP available; fail closed for remote binds until TLS is
+        // implemented and verified end-to-end.
+        if (config.host != "127.0.0.1") {
             _status.value = McpServiceStatus.Error(
-                message = "MCP server requires a bearer token when binding outside 127.0.0.1.",
+                message = "Non-loopback MCP binding is disabled until TLS transport is available.",
                 stackTrace = "",
             )
-            Logger.w(LOG_TAG, "MCP server start denied: non-loopback bind without bearer token")
+            Logger.w(LOG_TAG, "MCP server start denied: non-loopback HTTP transport is not TLS protected")
             return
         }
         Logger.i(
