@@ -13,6 +13,7 @@ import com.niki914.zafiro.chat.agentic.python.PyRuntime.exec
 import com.niki914.zafiro.chat.agentic.python.PyRuntime.kill
 import com.niki914.zafiro.chat.agentic.python.PyRuntime.warmUp
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
@@ -58,11 +59,11 @@ data class PyExecOutput(
  * 1. [exec] first pings the interpreter (2s) to detect a hard-stuck
  *    interpreter before paying the full exec timeout. On failure the worker
  *    process is killed and reconnected once, then the call is retried.
- * 2. The exec call itself is wrapped in `timeoutMs + 2s`. A normal timeout
- *    returns promptly from `runtime.exec_code` (it joins its own worker
- *    thread), so exceeding the wrapper means the interpreter is stuck in
- *    native code — the worker process is killed and the
- *    [TimeoutCancellationException] rethrown so callers report TIMEOUT.
+ * 2. The exec call itself is wrapped in `timeoutMs + 2s`. A Python-level
+ *    timeout returns partial output, but its daemon thread may still be alive;
+ *    the isolated worker process is therefore killed immediately after the
+ *    output is captured. A native-code hang exceeds the wrapper and follows
+ *    the same process-kill path before [TimeoutCancellationException] is rethrown.
  *
  * [warmUp] should be called during [android.app.Application.onCreate] to
  * bring up the worker process and start the interpreter early. [kill] is
@@ -245,7 +246,13 @@ object PyRuntime {
             val result = withTimeout(timeoutMs + EXEC_GRACE_MS) {
                 withContext(Dispatchers.IO) { svc.exec(code, timeoutMs) }
             }
-            return consume(result)
+            val output = consume(result)
+            if (result.status == PyExecResult.Status.TIMEOUT) {
+                // A timed-out Python thread cannot be safely interrupted in-process.
+                // Terminate the dedicated worker so it cannot continue side effects.
+                withContext(NonCancellable) { kill() }
+            }
+            return output
         } catch (e: TimeoutCancellationException) {
             killAndReconnect()
             throw e

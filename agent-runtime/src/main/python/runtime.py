@@ -103,7 +103,8 @@ def exec_code(code: str, timeout: float = 30.0) -> dict:
     Returns:
         dict: {"status", "file_path", "inline_text"}.
         - status "ok": normal run, output in file_path
-        - status "timeout": partial output stays in file_path
+        - status "timeout": partial output stays in file_path; the caller MUST
+          terminate this isolated worker process because the Python thread may continue
         - inline_text is the degraded inline payload used only when writing
           the file failed (tail-clipped at 1 MB, stdout and stderr separated
           by a --- stderr --- marker).

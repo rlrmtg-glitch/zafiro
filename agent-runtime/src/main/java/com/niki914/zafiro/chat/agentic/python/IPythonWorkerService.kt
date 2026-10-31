@@ -54,9 +54,10 @@ data class PyExecResult(
  *
  * All three methods are synchronous (blocking) calls:
  * - [exec] blocks until the Python code finishes or its own join timeout fires
- *   (returns [PyExecResult.Status.TIMEOUT] with a partial-output file). If the
- *   interpreter is hard-stuck (native code holding the GIL), the call may never
- *   return — the client must wrap it in a timeout and then call [kill].
+ *   (returns [PyExecResult.Status.TIMEOUT] with a partial-output file). A normal
+ *   timeout does not stop the Python thread: the client must capture the partial
+ *   output and kill this isolated process. Native-code hangs are killed by the
+ *   client's outer timeout through the same [kill] method.
  * - [ping] performs a fast interpreter probe; it also never returns when the
  *   interpreter is stuck. The client uses it to detect a dead interpreter
  *   before paying a full exec timeout.

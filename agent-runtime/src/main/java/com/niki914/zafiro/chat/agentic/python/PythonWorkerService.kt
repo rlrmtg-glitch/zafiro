@@ -16,13 +16,12 @@ import java.util.concurrent.TimeUnit
  * `agent-runtime/src/main/AndroidManifest.xml`).
  *
  * Timeout model (see [IPythonWorkerService]):
- * - Normal timeout: `runtime.exec_code` joins its worker thread for
- *   `timeoutMs` and returns a `TimeoutError` text — no process kill, the
- *   interpreter stays healthy and reusable.
- * - Hard-stuck interpreter (native code holding the GIL): the Binder call
- *   never returns; the client's `withTimeout` fires and it invokes [kill],
- *   which destroys this process — the only reliable way to reclaim a stuck
- *   Python interpreter.
+ * - Normal timeout: `runtime.exec_code` returns flushed partial output, but its
+ *   daemon thread may continue running. The client immediately invokes [kill]
+ *   after capturing that output, destroying this isolated process so timed-out
+ *   code cannot continue side effects.
+ * - Hard-stuck interpreter (native code holding the GIL): the Binder call never
+ *   returns; the client's outer timeout invokes [kill] to destroy this process.
  *
  * Python is initialized on a dedicated [HandlerThread] so the interpreter's
  * "main thread" is stable for the process lifetime. Binder threads may call

@@ -1,6 +1,9 @@
 name: Build Zafiro debug APK
 
 on:
+  push:
+    branches:
+      - security/governed-assistant-v1
   workflow_dispatch:
 
 permissions:

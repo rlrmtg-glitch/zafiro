@@ -1,3 +1,4 @@
+// 保护：正常超时后，仍在运行的 Python 线程必须随隔离 worker 进程一起终止。
 package com.niki914.zafiro.chat.agentic.python
 
 import android.os.IBinder
@@ -67,7 +68,7 @@ class PyRuntimeTest {
     }
 
     @Test
-    fun `exec normal timeout returns TimeoutError text without killing`() = runBlocking {
+    fun `exec normal timeout preserves partial output and kills worker`() = runBlocking {
         val fake = FakeWorker().also { PyRuntime.testService = it }
         fake.execResult = PyExecResult(
             PyExecResult.Status.TIMEOUT, null,
@@ -78,7 +79,8 @@ class PyRuntimeTest {
 
         assertTrue(result.output.contains("timed out after"))
         assertTrue(result.timedOut)
-        assertFalse(fake.killed)
+        assertTrue(fake.killed)
+        assertEquals(1, fake.killCount)
     }
 
     @Test

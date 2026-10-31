@@ -108,6 +108,7 @@ lock, process restart and concurrent requests.
 - Hardened the MCP server adapter with an explicit host-side tool allowlist that is empty by default. The MCP service configuration alone can no longer expose tools; a tool must also be explicitly allowlisted in code. Removed raw argument logging from the MCP invocation start event to reduce credential and personal-data leakage. This is a compatibility-impacting change: app data will no longer participate in Android backup/restore by default. A future explicit export/restore design is still required.
 - Hardened MCP exception handling so exception messages, stack traces, image file paths and parser exception details are not copied into logs or returned to the remote caller. MCP callers receive a generic failure message; detailed diagnostics must be captured only in a separately protected local diagnostic channel.
 - Added constructor bounds to the approval vault (1 ms–5 minutes, at most 256 outstanding tokens), overflow-safe expiry calculation and tests for invalid bounds.
+- Closed a Python timeout-containment gap: when `runtime.exec_code` returns a normal timeout, the client first captures the flushed partial output and then kills the dedicated `:python` process. Python threads cannot be safely force-stopped in-process; process termination prevents a timed-out script from continuing side effects. The next Python invocation starts a fresh worker. Concurrent Python calls sharing that worker may also be terminated, which is safer than leaving timed-out code running.
 - Important limitation: the approval vault is a primitive, not a complete authorization system. No trusted approval UI/controller is connected, and it does not itself prove that `approveAfterHumanConfirmation` was called as a result of a genuine human action. Do not wire this method to model-, MCP-, skill- or background-agent-controlled code.
 
 ## Current implementation status
@@ -119,7 +120,10 @@ lock, process restart and concurrent requests.
   tamper-evident audit log and device-lock/process-restart revocation are not
   implemented.
 - Phase 2: model-facing tool resolution and the MCP server adapter fail closed
-  by default. Direct/internal execution paths have not all been proven brokered.
+  by default. Python execution runs in a dedicated `:python` process; both normal
+  Python-level timeouts and hard native-code hangs now terminate that process.
+  Shell, screen, root/Shizuku, SSH, skill and other direct/internal execution paths
+  have not all been proven brokered and remain gated off from default exposure.
 - Phase 3: Android backup is disabled by default. Cleartext traffic remains
   enabled and broad storage/overlay/accessibility/foreground-service
   permissions remain; exported-component and privileged-entry-point reviews
@@ -139,5 +143,7 @@ lock, process restart and concurrent requests.
 - Phase 6: background-agent execution limits and authority revocation are
   outstanding.
 - Phase 7: build workflow actions are pinned to immutable commit SHAs; the Gradle 9.3.1 distribution checksum is configured and the official Gradle 9.3.1 wrapper-JAR checksum is checked in CI. Dependency locking/verification, repository allowlisting, SBOM and provenance remain outstanding. The wrapper checksum step and build have not yet been executed.
-- Phase 8: tests have been added but have not been run; no build or dynamic
-  security test has been completed.
+- Phase 8: focused regression coverage now asserts that a normal Python timeout
+  kills the isolated worker after preserving partial output. The push-triggered
+  CI run for this hardening commit must pass before the resulting APK is treated
+  as a candidate; dynamic device security verification remains outstanding.
