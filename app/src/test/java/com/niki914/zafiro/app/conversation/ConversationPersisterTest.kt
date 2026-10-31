@@ -12,6 +12,8 @@ import com.niki914.okia.message.AssistantMessage
 import com.niki914.okia.message.ContentBlock
 import com.niki914.okia.message.Message
 import com.niki914.zafiro.api.model.AgentState
+import com.niki914.zafiro.repo.FakeDomainSettingsStore
+import com.niki914.zafiro.repo.XRepo
 import com.niki914.zafiro.api.model.ApprovalRequest
 import com.niki914.zafiro.api.model.TurnOutcome
 import com.niki914.zafiro.app.util.SilentLoggerRule
@@ -51,6 +53,9 @@ class ConversationPersisterTest {
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
         context.deleteDatabase(DB_NAME)
+        XRepo.resetForTest()
+        XRepo.init(context)
+        XRepo.installStoreForTest(FakeDomainSettingsStore())
         ConversationRepo.init(context)
     }
 
@@ -58,6 +63,7 @@ class ConversationPersisterTest {
     fun tearDown() = runTest {
         ConversationPersister.resetForTest()
         ConversationRepo.closeForTest()
+        XRepo.resetForTest()
         context.deleteDatabase(DB_NAME)
     }
 

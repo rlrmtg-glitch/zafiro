@@ -44,6 +44,9 @@ class TurnNotificationManagerTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
+        XRepo.resetForTest()
+        XRepo.init(context)
+        XRepo.installStoreForTest(FakeDomainSettingsStore())
         fakeChannelManager = FakeNotificationChannelManager(context)
         mockActivity = Robolectric.buildActivity(Activity::class.java).setup().get()
         fakeAppService =
@@ -60,6 +63,7 @@ class TurnNotificationManagerTest {
     fun tearDown() {
         TurnNotificationManager.resetForTest()
         ServiceRegistry.clearForTest()
+        XRepo.resetForTest()
     }
 
     @Test
