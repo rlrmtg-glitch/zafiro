@@ -134,6 +134,10 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
+        <receiver
+            android:name="com.niki914.zafiro.app.notification.ResidentNotificationActionReceiver"
+            android:exported="false" />
+
         <service
             android:name="com.niki914.zafiro.runtime.service.AgentRuntimeService"
             android:exported="true"

@@ -53,6 +53,9 @@ not yet a complete broker and must not be represented as one.
 - Disable backup by default and add narrowly scoped data-extraction rules.
 - Audit exported activities, services, providers, Binder identity checks,
   accessibility and Xposed entry points.
+- Route resident-notification Stop / Approve / Decline actions through a
+  non-exported receiver; the exported Binder service must not accept those
+  notification actions as unauthenticated start intents.
 - Keep privileged operations behind a small, auditable broker.
 
 Manifest changes require compatibility review; do not remove permissions
@@ -124,10 +127,11 @@ lock, process restart and concurrent requests.
   Python-level timeouts and hard native-code hangs now terminate that process.
   Shell, screen, root/Shizuku, SSH, skill and other direct/internal execution paths
   have not all been proven brokered and remain gated off from default exposure.
-- Phase 3: Android backup is disabled by default. Cleartext traffic remains
-  enabled and broad storage/overlay/accessibility/foreground-service
-  permissions remain; exported-component and privileged-entry-point reviews
-  are incomplete.
+- Phase 3: Android backup is disabled by default. Resident notification
+  Stop / Approve / Decline actions now target a non-exported receiver instead
+  of the exported Binder service. Cleartext traffic remains enabled and broad
+  storage/overlay/accessibility/foreground-service permissions remain;
+  exported-component and privileged-entry-point reviews are incomplete.
 - Phase 4: MCP raw-argument and exception-detail logging/output are reduced.
   Keystore-backed encryption, database/settings protection, credential
   redaction across all logs, retention and secure export/deletion remain

@@ -20,11 +20,9 @@ import com.niki914.zafiro.api.AgentControl
 import com.niki914.zafiro.api.AgentManager
 import com.niki914.zafiro.api.TurnStart
 import com.niki914.zafiro.api.model.AgentState
-import com.niki914.zafiro.api.model.ApprovalDecision
 import com.niki914.zafiro.api.model.TurnFailureCode
 import com.niki914.zafiro.app.MainActivity
 import com.niki914.zafiro.app.notification.ResidentNotificationBuilder
-import com.niki914.zafiro.app.notification.ResidentNotificationManager
 import com.niki914.zafiro.app.notification.TurnNotificationManager
 import com.niki914.zafiro.business.notification.NotificationChannelManager
 import com.niki914.zafiro.business.permission.Permission
@@ -68,21 +66,6 @@ class AgentRuntimeService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ResidentNotificationBuilder.ACTION_STOP -> {
-                Logger.i(LOG_TAG, "Resident notification: Stop clicked")
-                agentControl.stop()
-            }
-
-            ResidentNotificationBuilder.ACTION_APPROVE -> {
-                Logger.i(LOG_TAG, "Resident notification: Approve clicked")
-                ResidentNotificationManager.resolveApproval(ApprovalDecision.Allow)
-            }
-
-            ResidentNotificationBuilder.ACTION_DECLINE -> {
-                Logger.i(LOG_TAG, "Resident notification: Decline clicked")
-                ResidentNotificationManager.resolveApproval(ApprovalDecision.Deny)
-            }
-
             ACTION_START_RESIDENT -> {
                 isResidentRequested = true
                 updateResidentNotification()

@@ -136,27 +136,27 @@ object ResidentNotificationBuilder {
     }
 
     fun createStopIntent(context: Context): PendingIntent {
-        val intent = Intent(context, AgentRuntimeService::class.java).apply {
+        val intent = Intent(context, ResidentNotificationActionReceiver::class.java).apply {
             action = ACTION_STOP
         }
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        return PendingIntent.getService(context, REQUEST_CODE_STOP, intent, flags)
+        return PendingIntent.getBroadcast(context, REQUEST_CODE_STOP, intent, flags)
     }
 
     fun createApproveIntent(context: Context): PendingIntent {
-        val intent = Intent(context, AgentRuntimeService::class.java).apply {
+        val intent = Intent(context, ResidentNotificationActionReceiver::class.java).apply {
             action = ACTION_APPROVE
         }
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        return PendingIntent.getService(context, REQUEST_CODE_APPROVE, intent, flags)
+        return PendingIntent.getBroadcast(context, REQUEST_CODE_APPROVE, intent, flags)
     }
 
     fun createDeclineIntent(context: Context): PendingIntent {
-        val intent = Intent(context, AgentRuntimeService::class.java).apply {
+        val intent = Intent(context, ResidentNotificationActionReceiver::class.java).apply {
             action = ACTION_DECLINE
         }
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        return PendingIntent.getService(context, REQUEST_CODE_DECLINE, intent, flags)
+        return PendingIntent.getBroadcast(context, REQUEST_CODE_DECLINE, intent, flags)
     }
 
     /**
